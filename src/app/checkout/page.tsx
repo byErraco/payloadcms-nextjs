@@ -23,7 +23,7 @@ export default function CheckoutPage() {
   const { items, removeItem } = useCart()
   const router = useRouter()
   const { isFetching, data } = useUser()
-  console.log("data", data)
+  const [cartItems, setCartItems] = useState<any>([])
 
   const productIds = items.map(({ product }) => product.id)
 
@@ -36,10 +36,37 @@ export default function CheckoutPage() {
       setOpen(true)
     }
   }, [data, isFetching])
-  const cartTotal = items.reduce(
-    (total, { product }) => total + product.price,
-    0
-  )
+  useEffect(() => {
+    if (items.length > 0) {
+      const cartItemsMap = items.map(({ product: item }: any) => {
+        // console.log("item", item.images[0]?.image?.url)
+        let price
+        if (data?.subscription?.tier?.id)
+          price = item.prices.find(
+            (item: any) =>
+              item.availableByTier?.id === data?.subscription?.tier?.id
+          )?.price
+        return {
+          id: item.id,
+          title: item.title,
+          price: price || 500,
+          // price: price || item.price,
+          images: item.images,
+          // images: item.images[0]?.image?.url,
+          // image: item.images[0]?.url,
+          quantity: 1,
+        }
+      })
+      setCartItems(cartItemsMap)
+    }
+  }, [data, items])
+
+  // @ts-ignore
+  const cartTotal = cartItems.reduce((total, item) => total + item?.price, 0)
+  // const cartTotal = items.reduce(
+  //   (total, { product }) => total + product.price,
+  //   0
+  // )
 
   const [open, setOpen] = useState(false)
   const onHandleRedirectLogin = () => {
@@ -136,11 +163,12 @@ export default function CheckoutPage() {
             <div className="grid gap-4">
               <div className="flex flex-col gap-2">
                 {isMounted &&
-                  items.map(({ product }) => {
+                  // @ts-ignore
+                  cartItems.map((item) => {
                     return (
-                      <div key={product.id} className="flex justify-between">
-                        <span> {product.title}</span>
-                        <span>{formatPrice(product.price)}</span>
+                      <div key={item.id} className="flex justify-between">
+                        <span> {item.title}</span>
+                        <span>{formatPrice(item.price)}</span>
                       </div>
                     )
                   })}

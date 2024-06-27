@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
-import { z } from "zod"
+import { ZodError, z } from "zod"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -26,6 +26,8 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
+import { trpc } from "@/trpc/client"
+import { useQueryClient } from "@tanstack/react-query"
 
 const profileFormSchema = z.object({
   name: z
@@ -36,11 +38,11 @@ const profileFormSchema = z.object({
     .max(30, {
       message: "Username must not be longer than 30 characters.",
     }),
-  email: z
-    .string({
-      required_error: "Please select an email to display.",
-    })
-    .email(),
+  // email: z
+  //   .string({
+  //     required_error: "Please select an email to display.",
+  //   })
+  //   .email(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -55,21 +57,34 @@ export function ProfileForm() {
     mode: "onChange",
   })
 
-  const { fields, append } = useFieldArray({
-    // @ts-ignore
-    name: "urls",
-    control: form.control,
-  })
+  const queryClient = useQueryClient()
+
+  const { mutate: updateUserInfo, isLoading } =
+    trpc.auth.updateUserInfo.useMutation({
+      onError: (err) => {
+        if (err?.data?.code === "UNAUTHORIZED") {
+          toast({ title: "Invalid request" })
+          return
+        }
+        if (err instanceof ZodError) {
+          toast({
+            title: err.issues[0].message,
+          })
+          return
+        }
+        toast({ title: "Something went wrong" })
+      },
+      onSuccess: ({ success }) => {
+        if (success) {
+          queryClient.refetchQueries({ queryKey: ["user"] })
+
+          toast({ title: "Your profile has been updated" })
+        }
+      },
+    })
 
   function onSubmit(data: ProfileFormValues) {
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    })
+    updateUserInfo({ name: data.name })
   }
 
   return (
@@ -92,7 +107,7 @@ export function ProfileForm() {
             </FormItem>
           )}
         />
-        <FormField
+        {/* <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
@@ -117,7 +132,7 @@ export function ProfileForm() {
               <FormMessage />
             </FormItem>
           )}
-        />
+        /> */}
 
         <Button type="submit">Update profile</Button>
       </form>

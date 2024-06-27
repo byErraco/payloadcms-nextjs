@@ -19,62 +19,63 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
-export default function UserOrdersTable() {
+export default function UserOrdersTable({ orders }: { orders: any[] }) {
   const [search, setSearch] = useState("")
   const [sort, setSort] = useState({ key: "orderNumber", order: "asc" })
-  const orders = [
-    {
-      orderNumber: "#1234",
-      date: "2023-04-15",
-      items: [
-        { name: "Product A", quantity: 2, price: 19.99 },
-        { name: "Product B", quantity: 1, price: 29.99 },
-      ],
-      total: 69.97,
-      status: "Delivered",
-      shippingAddress: {
-        name: "John Doe",
-        address: "123 Main St, Anytown USA",
-        phone: "555-1234",
-      },
-      paymentMethod: "Visa ending in 1234",
-    },
-    {
-      orderNumber: "#5678",
-      date: "2023-03-20",
-      items: [
-        { name: "Product C", quantity: 1, price: 39.99 },
-        { name: "Product D", quantity: 3, price: 14.99 },
-      ],
-      total: 89.96,
-      status: "Shipped",
-      shippingAddress: {
-        name: "Jane Smith",
-        address: "456 Oak Rd, Somewhere CA",
-        phone: "555-5678",
-      },
-      paymentMethod: "MasterCard ending in 5678",
-    },
-    {
-      orderNumber: "#9012",
-      date: "2023-02-10",
-      items: [{ name: "Product E", quantity: 1, price: 49.99 }],
-      total: 49.99,
-      status: "Cancelled",
-      shippingAddress: {
-        name: "Bob Johnson",
-        address: "789 Pine St, Elsewhere NY",
-        phone: "555-9012",
-      },
-      paymentMethod: "American Express ending in 9012",
-    },
-  ]
+  // const orders = [
+  //   {
+  //     orderNumber: "#1234",
+  //     date: "2023-04-15",
+  //     items: [
+  //       { name: "Product A", quantity: 2, price: 19.99 },
+  //       { name: "Product B", quantity: 1, price: 29.99 },
+  //     ],
+  //     total: 69.97,
+  //     status: "Delivered",
+  //     shippingAddress: {
+  //       name: "John Doe",
+  //       address: "123 Main St, Anytown USA",
+  //       phone: "555-1234",
+  //     },
+  //     paymentMethod: "Visa ending in 1234",
+  //   },
+  //   {
+  //     orderNumber: "#5678",
+  //     date: "2023-03-20",
+  //     items: [
+  //       { name: "Product C", quantity: 1, price: 39.99 },
+  //       { name: "Product D", quantity: 3, price: 14.99 },
+  //     ],
+  //     total: 89.96,
+  //     status: "Shipped",
+  //     shippingAddress: {
+  //       name: "Jane Smith",
+  //       address: "456 Oak Rd, Somewhere CA",
+  //       phone: "555-5678",
+  //     },
+  //     paymentMethod: "MasterCard ending in 5678",
+  //   },
+  //   {
+  //     orderNumber: "#9012",
+  //     date: "2023-02-10",
+  //     items: [{ name: "Product E", quantity: 1, price: 49.99 }],
+  //     total: 49.99,
+  //     status: "Cancelled",
+  //     shippingAddress: {
+  //       name: "Bob Johnson",
+  //       address: "789 Pine St, Elsewhere NY",
+  //       phone: "555-9012",
+  //     },
+  //     paymentMethod: "American Express ending in 9012",
+  //   },
+  // ]
   const filteredOrders = useMemo(() => {
     return orders
       .filter(
         (order) =>
           order.orderNumber.toLowerCase().includes(search.toLowerCase()) ||
           order.date.toLowerCase().includes(search.toLowerCase()) ||
+          // @ts-ignore
           order.items.some((item) =>
             item.name.toLowerCase().includes(search.toLowerCase())
           ) ||
@@ -151,7 +152,7 @@ export default function UserOrdersTable() {
                 )}
               </TableHead>
               <TableHead>Items</TableHead>
-              <TableHead>Quantity</TableHead>
+              {/* <TableHead>Quantity</TableHead> */}
               <TableHead
                 className="text-right cursor-pointer"
                 onClick={() =>
@@ -210,14 +211,15 @@ export default function UserOrdersTable() {
                 </TableCell>
                 <TableCell>{order.date}</TableCell>
                 <TableCell>
+                  {/* @ts-ignore*/}
                   {order.items.map((item) => item.name).join(", ")}
                 </TableCell>
-                <TableCell>
+                {/* <TableCell>
                   {order.items.reduce(
                     (total, item) => total + item.quantity,
                     0
                   )}
-                </TableCell>
+                </TableCell> */}
                 <TableCell className="text-right">
                   ${order.total.toFixed(2)}
                 </TableCell>
@@ -235,12 +237,12 @@ export default function UserOrdersTable() {
                     {order.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="text-right">
+                {/* <TableCell className="text-right">
                   <Button variant="ghost" size="icon">
                     <MoveHorizontalIcon className="w-4 h-4" />
                     <span className="sr-only">Order actions</span>
                   </Button>
-                </TableCell>
+                </TableCell> */}
               </TableRow>
             ))}
           </TableBody>

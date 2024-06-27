@@ -19,9 +19,10 @@ export const Users: CollectionConfig = {
     access: {
         read: adminsAndUser,
         create: anyone,
-        update: adminsAndUser,
+        // update: () => true,
+        update: admins,
         delete: admins,
-        admin: ({ req: { user } }) => checkRole(['admin'], user),
+        // admin: ({ req: { user } }) => checkRole(['admin'], user),
         // admin:({req: {user}}) => user.role === 'admin',
     },
     hooks: {

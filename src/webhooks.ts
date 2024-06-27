@@ -57,6 +57,10 @@ export const stripeWebhookHandler = async (
         return handleInvoiceEvent(event, 'succeeded', res);
       case 'invoice.payment_failed':
         return handleInvoiceEvent(event, 'failed', res);
+      case 'payment_intent.succeeded':
+        return handlePaymentIntentEvent(event, 'succeeded', res);
+      case 'payment_intent.payment_failed':
+        return handlePaymentIntentEvent(event, 'failed', res);
       case 'checkout.session.completed':
         return handleCheckoutSessionCompleted(event, res);
       default:
@@ -112,6 +116,7 @@ async function handleSubscriptionEvent(
     planId: subscription.items.data[0]?.price.id,
     ownedBy: subscription.metadata?.userId || '',
     email: customerEmail,
+    tier: subscription.metadata?.tierId || '',
   };
   // console.log('type', type);
   // console.log('subscriptionData', subscriptionData);
@@ -156,6 +161,84 @@ async function handleSubscriptionEvent(
   }
 
   return res.status(200).json({ status: 200, message: `Subscription ${type} success`, data: subscriptionDoc, })
+}
+
+
+async function handlePaymentIntentEvent(
+  event: Stripe.Event,
+  status: 'succeeded' | 'failed',
+  res: express.Response
+) {
+  const payload = await getPayloadClient()
+  const paymentIntent = event.data.object as Stripe.PaymentIntent;
+  const userId = paymentIntent.metadata?.userId;
+  const orderId = paymentIntent.metadata?.orderId;
+
+  const { docs: orders } = await payload.find({
+    collection: 'orders',
+    depth: 2,
+    where: {
+      id: {
+        equals: orderId,
+      },
+    },
+  })
+
+  const [order] = orders
+
+  if (!order)
+    return res
+      .status(404)
+      .json({ error: 'No such order exists.' })
+
+  await payload.update({
+    collection: 'orders',
+    data: {
+      _isPaid: true,
+    },
+    where: {
+      id: {
+        equals: orderId,
+      },
+    },
+  })
+
+
+  const { docs: users } = await payload.find({
+    collection: 'users',
+    where: {
+      id: userId,
+    },
+  } as any)
+
+  const [user] = users
+
+  if (!user)
+    return res
+      .status(404)
+      .json({ error: 'No such user exists.' })
+
+  try {
+    const data = await resend.emails.send({
+      from: 'AWSHCommerce <hello@awsh.net>',
+      //   @ts-ignore
+      to: [user.email],
+      subject:
+        'Thanks for your order! This is your receipt.',
+      html: ReceiptEmailHtml({
+        date: new Date(),
+        //   @ts-ignore
+        email: user.email,
+        //   @ts-ignore
+        orderId: orderId,
+        products: order.products as Product[],
+      }),
+    })
+    return res.status(200).json({ data })
+  } catch (error) {
+    return res.status(500).json({ error })
+  }
+
 }
 
 async function handleInvoiceEvent(
@@ -220,14 +303,17 @@ async function handleInvoiceEvent(
 
   }
 
-  return res.status(200).json({
-    status: 200, message: `Invoice payment ${status}`,
-    data: invoiceDoc,
-  })
+  // return res.status(200).json({
+  //   status: 200, message: `Invoice payment ${status}`,
+  //   data: invoiceDoc,
+  // })
 
 
 
 }
+
+
+
 
 
 async function handleCheckoutSessionCompleted(
@@ -259,7 +345,8 @@ async function handleCheckoutSessionCompleted(
         collection: 'users',
         id: metadata?.userId,
         data: {
-          subscription: session.id
+          subscription: session.id,
+          tier: metadata?.tierId,
         }
       } as any)
 

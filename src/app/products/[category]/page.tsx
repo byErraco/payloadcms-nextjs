@@ -12,17 +12,12 @@ export default async function CategoryPage({
   params: { category: string }
   searchParams?: { [key: string]: string | string[] | undefined }
 }) {
-  console.log("CAAAAAAARL")
-  console.log("params", params)
-  console.log("params?.category", params?.category)
   const categories = params?.category?.split(" ")
-  console.log("categories", categories)
   const { sort } = searchParams as { [key: string]: string }
   const { sortKey, reverse } =
     sorting.find((item) => item.slug === sort) || defaultSort
   let q = [params?.category]
   // let q = [{ slug: params?.category }]
-  console.log("q", q)
   const payload = await getPayloadClient()
   const { docs: products } = await payload.find({
     collection: "products",

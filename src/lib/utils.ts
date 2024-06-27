@@ -6,8 +6,6 @@ import { twMerge } from "tailwind-merge"
 import { ReadonlyURLSearchParams } from 'next/navigation';
 
 export const createUrl = (pathname: string, params: URLSearchParams | ReadonlyURLSearchParams) => {
-  console.log('createUrl');
-  console.log('pathname', pathname);
   const paramsString = params.toString();
   const queryString = `${paramsString.length ? '?' : ''}${paramsString}`;
 

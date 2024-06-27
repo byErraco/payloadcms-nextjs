@@ -18,21 +18,59 @@ import { useCart } from "@/hooks/use-cart"
 import { ScrollArea } from "../ui/scroll-area"
 import CartItem from "./cart-item"
 import { useEffect, useState } from "react"
+import useUser from "@/hooks/use-User"
+
+const USER_TIERS = {
+  BASIC: "Basic",
+  PRO: "Pro",
+}
 
 const CartSheet = () => {
+  const { isFetching, data } = useUser()
+  // console.log("data", data)
   const { items } = useCart()
+  // console.log("items", items)
+  // console.log("items", items)
   const itemCount = items.length
 
   const [isMounted, setIsMounted] = useState<boolean>(false)
 
+  const [cartItems, setCartItems] = useState<any>([])
+
   useEffect(() => {
     setIsMounted(true)
   }, [])
+  useEffect(() => {
+    if (items.length > 0) {
+      const cartItemsMap = items.map(({ product: item }: any) => {
+        // console.log("item", item.images[0]?.image?.url)
+        let price
+        if (data?.subscription?.tier?.id)
+          price = item.prices.find(
+            (item: any) =>
+              item.availableByTier?.id === data?.subscription?.tier?.id
+          )?.price
+        return {
+          id: item.id,
+          title: item.title,
+          price: price || 500,
+          // price: price || item.price,
+          images: item.images,
+          // images: item.images[0]?.image?.url,
+          // image: item.images[0]?.url,
+          quantity: 1,
+        }
+      })
+      setCartItems(cartItemsMap)
+    }
+  }, [data, items])
 
-  const cartTotal = items.reduce(
-    (total, { product }) => total + product.price,
-    0
-  )
+  // @ts-ignore
+  const cartTotal = cartItems.reduce((total, item) => total + item?.price, 0)
+  // const cartTotal = items.reduce(
+  //   (total, { product }) => total + product.price,
+  //   0
+  // )
 
   const fee = 1
 
@@ -52,9 +90,13 @@ const CartSheet = () => {
           <>
             <div className="flex w-full flex-col pr-6">
               <ScrollArea>
-                {items.map(({ product }) => (
-                  <CartItem product={product} key={product.id} />
+                {/* @ts-ignore */}
+                {cartItems.map((item) => (
+                  <CartItem product={item} key={item.id} />
                 ))}
+                {/* {items.map(({ product }) => (
+                  <CartItem product={product} key={product.id} />
+                ))} */}
               </ScrollArea>
             </div>
             <div className="space-y-4 pr-6">

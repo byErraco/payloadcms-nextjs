@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { toast } from "sonner"
+
 import {
   Form,
   FormControl,
@@ -40,6 +40,8 @@ import Link from "next/link"
 import { trpc } from "@/trpc/client"
 import { useCart } from "@/hooks/use-cart"
 import { useRouter } from "next/navigation"
+import { title } from "process"
+import { toast } from "@/components/ui/use-toast"
 
 const checkoutFormSchema = z.object({
   name: z
@@ -136,12 +138,17 @@ export default function CheckoutFormWrapper() {
   } = useCheckoutStore()
 
   const router = useRouter()
-  const { items, removeItem } = useCart()
+  const { items, removeItem, clearCart } = useCart()
   const productIds = items.map(({ product }) => product.id)
 
-  const { mutate: createCheckoutSession, isLoading } =
-    trpc.payment.createSession.useMutation({
-      onSuccess: ({ url }) => {
+  const { mutate: createOrder, isLoading } =
+    trpc.payment.createOrder.useMutation({
+      // @ts-ignore
+      onSuccess: ({ message, url }) => {
+        toast({
+          title: message,
+        })
+        clearCart()
         if (url) router.push(url)
       },
     })
@@ -158,6 +165,7 @@ export default function CheckoutFormWrapper() {
   // console.log("currentDeliveryMethodValue", currentDeliveryMethodValue)
 
   const onError = () => {
+    // @ts-ignore
     toast.error("Please fill out all required fields.")
   }
 
@@ -177,10 +185,18 @@ export default function CheckoutFormWrapper() {
       // console.log("multipleValues", multipleValues)
       const hasErrors = multipleValues.some((item) => item === undefined)
       if (hasErrors) {
+        // @ts-ignore
         toast.error("Please fill out all required fields.")
       }
     }
-    createCheckoutSession({ productIds, data })
+    console.log("data", data)
+    console.log("productIds", productIds)
+    // const orderDetails = {
+    //   products: productIds,
+    //   orderData: data,
+    // }
+    // console.log("orderData", orderData)
+    createOrder({ products: productIds, orderDetails: data })
   }
 
   function onSubmit(data: CheckoutFormValues) {

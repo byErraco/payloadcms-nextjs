@@ -37,6 +37,41 @@ export const Orders: CollectionConfig = {
       required: true,
     },
     {
+      name: 'deliveryStatus',
+      type: 'select',
+      options: [
+        {
+          label: 'delivered',
+          value: 'delivered',
+        },
+        {
+          label: 'pending',
+          value: 'pending',
+        },
+
+      ],
+      required: false
+    },
+    {
+      name: 'status',
+      type: 'select',
+      options: [
+        {
+          label: 'completed',
+          value: 'completed',
+        },
+        {
+          label: 'incomplete',
+          value: 'incomplete',
+        },
+        {
+          label: 'Cancelled',
+          value: 'cancelled',
+        },
+      ],
+      required: false
+    },
+    {
       name: 'orderedBy',
       type: 'relationship',
       relationTo: 'users',
@@ -75,12 +110,12 @@ export const Orders: CollectionConfig = {
     //     },
     //   },
     // },
-    // {
-    //   name: 'total',
-    //   type: 'number',
-    //   required: true,
-    //   min: 0,
-    // },
+    {
+      name: 'total',
+      type: 'number',
+      required: false,
+      min: 0,
+    },
     // {
     //   name: 'items',
     //   type: 'array',

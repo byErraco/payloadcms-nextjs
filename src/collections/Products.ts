@@ -1,3 +1,4 @@
+import { RowLabelArgs } from "payload/dist/admin/components/forms/RowLabel/types";
 import { admins } from "../payload/access/admin";
 import { slugField } from "../payload/fields/slug";
 import { CollectionConfig } from "payload/types";
@@ -5,10 +6,13 @@ import { CollectionConfig } from "payload/types";
 const Products: CollectionConfig = {
     slug: "products",
     admin: {
-        useAsTitle: "name",
+        useAsTitle: "title",
     },
     access: {
-
+        read: () => true,
+        update: admins,
+        create: admins,
+        delete: admins,
     },
     fields: [
         {
@@ -18,9 +22,9 @@ const Products: CollectionConfig = {
         },
         {
             name: 'price',
-            label: 'Price in USD',
-            min: 0,
-            max: 1000,
+            label: 'Base Price in USD',
+            // min: 0,
+            // max: 1000,
             type: 'number',
             required: true,
         },
@@ -29,16 +33,16 @@ const Products: CollectionConfig = {
             type: 'text',
             required: true,
         },
-        {
-            name: 'priceId',
-            type: 'text',
-            required: true,
-        },
-        {
-            name: 'stripeId',
-            type: 'text',
-            required: true,
-        },
+        // {
+        //     name: 'priceId',
+        //     type: 'text',
+        //     required: true,
+        // },
+        // {
+        //     name: 'stripeId',
+        //     type: 'text',
+        //     required: true,
+        // },
         {
             name: 'categories',
             type: 'relationship',
@@ -116,6 +120,42 @@ const Products: CollectionConfig = {
                 update: admins,
             },
             required: false,
+        },
+        {
+            name: 'prices', // required
+            type: 'array', // required
+            label: 'Product Tier Prices',
+            // minRows: 2,
+            // maxRows: 10,
+            labels: {
+                singular: 'Price',
+                plural: 'prices',
+            },
+            fields: [
+                // required
+                {
+                    name: 'price',
+                    label: 'Price in USD',
+                    // min: 0,
+                    // max: 1000,
+                    type: 'number',
+                    required: true,
+                },
+                {
+                    name: 'availableByTier',
+                    type: 'relationship',
+                    relationTo: 'tiers',
+
+                }
+
+            ],
+            admin: {
+                components: {
+                    RowLabel: ({ data, index }: RowLabelArgs) => {
+                        return data?.title || `Price ${String(index).padStart(2, '0')}`
+                    },
+                },
+            },
         },
     ]
 }

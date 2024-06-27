@@ -1,24 +1,29 @@
+/**
+ * v0 by Vercel.
+ * @see https://v0.dev/t/56FS9JgG2yw
+ * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
+ */
+
+import Link from "next/link"
+import Stripe from "stripe"
 import { getServerSideUser } from "@/lib/payload-utils"
 import Image from "next/image"
 import { cookies } from "next/headers"
 import { getPayloadClient } from "@/get-payload"
-import { notFound, redirect } from "next/navigation"
-import { Product, User } from "@/payload-types"
-// import { PRODUCT_CATEGORIES } from '@/config'
-import { formatPrice } from "@/lib/utils"
-import Link from "next/link"
-import Stripe from "stripe"
-// import PaymentStatus from '@/components/PaymentStatus'
+import { Shell } from "@/components/shell"
+import { Button } from "@/components/ui/button"
+import React from "react"
+import { formatPrice } from "../../lib/utils"
 
 interface PageProps {
   searchParams: {
     [key: string]: string | string[] | undefined
   }
 }
-// Initialize Stripe with your secret key
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-const ThankYouPage = async ({ searchParams }: PageProps) => {
+export default async function Success({ searchParams }: PageProps) {
   const sessionId = searchParams.session_id
   const nextCookies = cookies()
 
@@ -29,176 +34,95 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
     searchParams?.session_id as string
   )
 
+  // @ts-ignore
+  const totalPaid = session?.amount_total / 100
+  const subscriptionId = session?.subscription
+  const tierSubscriptionPrice = session?.metadata?.subscription
+
+  const { docs: tiers } = await payload.find({
+    collection: "tiers",
+    where: {
+      priceIdYearly: {
+        equals: tierSubscriptionPrice,
+      },
+    },
+  })
+
+  const [tier] = tiers
+
   const jsonString = JSON.stringify(session, null, 2)
-
-  //   const { docs: orders } = await payload.find({
-  //     collection: 'orders',
-  //     depth: 2,
-  //     where: {
-  //       id: {
-  //         equals: orderId,
-  //       },
-  //     },
-  //   })
-
-  //   const [order] = orders
-
-  //   if (!order) return notFound()
-
-  //   const orderUserId =
-  //     typeof order.user === 'string'
-  //       ? order.user
-  //       : order.user.id
-
-  //   if (orderUserId !== user?.id) {
-  //     return redirect(
-  //       `/sign-in?origin=thank-you?orderId=${order.id}`
-  //     )
-  //   }
-
-  //   const products = order.products as Product[]
-
-  //   const orderTotal = products.reduce((total, product) => {
-  //     return total + product.price
-  //   }, 0)
-
+  // console.log("jsonString", jsonString)
   return (
-    <main className="relative lg:min-h-full">
-      <div className="hidden lg:block h-80 overflow-hidden lg:absolute lg:h-full lg:w-1/2 lg:pr-4 xl:pr-12">
-        <Image
-          fill
-          src="/checkout-thank-you.jpg"
-          className="h-full w-full object-cover object-center"
-          alt="thank you for your order"
-        />
+    <Shell>
+      <div className="flex flex-col items-center justify-center  bg-muted/60 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full space-y-8">
+          <div>
+            <div className="mx-auto h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckIcon className="h-6 w-6 text-green-600" />
+            </div>
+            <h2 className="mt-6 text-center text-3xl font-extrabold ">
+              Payment Successful
+            </h2>
+            <p className="mt-2 text-center text-sm ">
+              Thank you for your purchase!
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <img
+              src="/success-tier.webp"
+              width="300"
+              height="300"
+              alt="Payment Success"
+              className="max-w-[300px]"
+            />
+          </div>
+          <div>
+            <Button className="w-full" asChild>
+              <Link href="/dashboard">Continue to Dashboard</Link>
+            </Button>
+          </div>
+        </div>
       </div>
-
-      <div>
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:grid lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8 lg:py-32 xl:gap-x-24">
-          <div className="lg:col-start-2">
-            <p className="text-sm font-medium ">Order successful</p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight  sm:text-5xl">
-              Thanks for ordering
-            </h1>
-            {jsonString}
-            {/* {order._isPaid ? (
-              <p className='mt-2 text-base text-muted-foreground'>
-                Your order was processed and your assets are
-                available to download below. We&apos;ve sent
-                your receipt and order details to{' '}
-                {typeof order.user !== 'string' ? (
-                  <span className='font-medium text-gray-900'>
-                    {order.user.email}
-                  </span>
-                ) : null}
-                .
-              </p>
-            ) : (
-              <p className='mt-2 text-base text-muted-foreground'>
-                We appreciate your order, and we&apos;re
-                currently processing it. So hang tight and
-                we&apos;ll send you confirmation very soon!
-              </p>
-            )} */}
-
-            <div className="mt-16 text-sm font-medium">
-              <div className="text-muted-foreground">Order nr.</div>
-              {/* <div className="mt-2 text-gray-900">{order.id}</div> */}
-
-              {/* <ul className='mt-6 divide-y divide-gray-200 border-t border-gray-200 text-sm font-medium text-muted-foreground'>
-                {(order.products as Product[]).map(
-                  (product) => {
-                    const label = PRODUCT_CATEGORIES.find(
-                      ({ value }) =>
-                        value === product.category
-                    )?.label
-
-                    const downloadUrl = (
-                      product.product_files as ProductFile
-                    ).url as string
-
-                    const { image } = product.images[0]
-
-                    return (
-                      <li
-                        key={product.id}
-                        className='flex space-x-6 py-6'>
-                        <div className='relative h-24 w-24'>
-                          {typeof image !== 'string' &&
-                          image.url ? (
-                            <Image
-                              fill
-                              src={image.url}
-                              alt={`${product.name} image`}
-                              className='flex-none rounded-md bg-gray-100 object-cover object-center'
-                            />
-                          ) : null}
-                        </div>
-
-                        <div className='flex-auto flex flex-col justify-between'>
-                          <div className='space-y-1'>
-                            <h3 className='text-gray-900'>
-                              {product.name}
-                            </h3>
-
-                            <p className='my-1'>
-                              Category: {label}
-                            </p>
-                          </div>
-
-                          {order._isPaid ? (
-                            <a
-                              href={downloadUrl}
-                              download={product.name}
-                              className='text-blue-600 hover:underline underline-offset-2'>
-                              Download asset
-                            </a>
-                          ) : null}
-                        </div>
-
-                        <p className='flex-none font-medium text-gray-900'>
-                          {formatPrice(product.price)}
-                        </p>
-                      </li>
-                    )
-                  }
-                )}
-              </ul> */}
-              {/* 
-              <div className="space-y-6 border-t border-gray-200 pt-6 text-sm font-medium text-muted-foreground">
-                <div className="flex justify-between">
-                  <p>Subtotal</p>
-                  <p className="text-gray-900">{formatPrice(orderTotal)}</p>
-                </div>
-
-                <div className="flex justify-between">
-                  <p>Transaction Fee</p>
-                  <p className="text-gray-900">{formatPrice(1)}</p>
-                </div>
-
-                <div className="flex items-center justify-between border-t border-gray-200 pt-6 text-gray-900">
-                  <p className="text-base">Total</p>
-                  <p className="text-base">{formatPrice(orderTotal + 1)}</p>
-                </div>
-              </div> */}
-
-              {/* <PaymentStatus
-                isPaid={order._isPaid}
-                orderEmail={(order.user as User).email}
-                orderId={order.id}
-              /> */}
-
-              <div className="mt-16 border-t border-gray-200 py-6 text-right">
-                <Link href="/products" className="text-sm font-medium ">
-                  Continue shopping &rarr;
-                </Link>
-              </div>
+      <div className="bg-muted py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto space-y-8">
+          <div>
+            <h3 className="text-lg font-medium ">Purchase Details</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-sm font-medium ">Plan</p>
+              <p className="text-base font-medium ">{tier.title}</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium ">Billing Frequency</p>
+              <p className="text-base font-medium ">Yearly</p>
+            </div>
+            <div>
+              <p className="text-sm font-medium ">Total Amount</p>
+              <p className="text-base font-medium ">{formatPrice(totalPaid)}</p>
             </div>
           </div>
         </div>
       </div>
-    </main>
+    </Shell>
   )
 }
 
-export default ThankYouPage
+function CheckIcon(props: any) {
+  return (
+    <svg
+      {...props}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M20 6 9 17l-5-5" />
+    </svg>
+  )
+}

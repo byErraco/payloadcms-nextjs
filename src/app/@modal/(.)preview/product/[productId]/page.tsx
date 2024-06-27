@@ -80,6 +80,7 @@ export default async function ProductModalPage({
         <div className="space-y-2">
           <h1 className="line-clamp-2 text-2xl font-bold">{product.title}</h1>
           <p className="text-base text-muted-foreground">
+            {/* @ts-ignore */}
             {formatPrice(product.price)}
           </p>
           <p className="text-base text-muted-foreground">

@@ -19,6 +19,9 @@ import { cookies } from "next/headers"
 import { getServerSideUser } from "@/lib/payload-utils"
 import Link from "next/link"
 import { getPayloadClient } from "@/get-payload"
+import { CheckItem } from "@/components/LandingPage/Pricing"
+import { CheckCircle2 } from "lucide-react"
+import ManageSubscriptionButton from "./_component/manage-subscription-button"
 
 export default async function Component() {
   const nextCookies = cookies()
@@ -33,6 +36,7 @@ export default async function Component() {
   } as any)
 
   const [user] = users
+  // console.log("user", user)
   //   const { data, isFetching } = useUser()
   //   console.log("data", data)
   //   if (isFetching)
@@ -65,7 +69,7 @@ export default async function Component() {
                 <div className="flex flex-col">
                   <span className="text-lg font-medium">
                     {/* @ts-ignore */}
-                    {user?.subscription?.id} Plan
+                    {user?.subscription?.tier?.title} Tier
                   </span>
                   <span className="text-muted-foreground">
                     {/* @ts-ignore */}
@@ -78,17 +82,35 @@ export default async function Component() {
                 </div>
               </div>
               <p className="text-muted-foreground">
-                Your current plan includes access to better prices
+                Your current plan includes:
               </p>
+              <div className="flex flex-col gap-2">
+                {/* {JSON.stringify(user?.subscription?.tier?.features)} */}
+                {/* @ts-ignore */}
+                {user?.subscription?.tier?.features.map((item) => (
+                  // <CheckItem key={feature} text={feature} />
+                  <div className="flex gap-2" key={item.id}>
+                    <CheckCircle2
+                      size={18}
+                      className="my-auto text-green-400"
+                    />
+                    <p className="pt-0.5 text-zinc-700 dark:text-zinc-300 text-sm">
+                      {item.feature}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="flex justify-end">
-              <Link
+            <div className="flex justify-center">
+              {/* @ts-ignore */}
+              <ManageSubscriptionButton />
+              {/* <Link
                 href="#"
                 className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-6 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
                 prefetch={false}
               >
                 Manage
-              </Link>
+              </Link> */}
             </div>
           </div>
         ) : (

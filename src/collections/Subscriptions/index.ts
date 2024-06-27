@@ -53,6 +53,11 @@ const Subscriptions: CollectionConfig = {
             name: 'ownedBy',
             type: 'relationship',
             relationTo: 'users',
+        },
+        {
+            name: 'tier',
+            type: 'relationship',
+            relationTo: 'tiers',
         }
     ],
 }

@@ -17,7 +17,7 @@ export function AlertDialogSignin({ open, setOpen, callback, onCancel }: any) {
         <AlertDialogHeader>
           <AlertDialogTitle>Sign in to your account</AlertDialogTitle>
           <AlertDialogDescription>
-            To be able to become a member, you need to sign in to your account.
+            To continue the purchase, you need to sign in to your account.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

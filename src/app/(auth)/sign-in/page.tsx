@@ -9,7 +9,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { cn } from "@/lib/utils"
 import {
   AuthCredentialsValidator,
+  LoginCredentialsValidator,
   TAuthCredentialsValidator,
+  TLoginCredentialsValidator,
 } from "@/lib/validators/account-credentials-validators"
 import { trpc } from "@/trpc/client"
 import { useForm } from "react-hook-form"
@@ -28,13 +30,12 @@ function SignInPage() {
   const priceId = searchParams.get("priceId")
   const subscription = searchParams.get("subscription") === "true"
 
-  console.log("returnCheckout", returnCheckout)
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<TAuthCredentialsValidator>({
-    resolver: zodResolver(AuthCredentialsValidator),
+  } = useForm<TLoginCredentialsValidator>({
+    resolver: zodResolver(LoginCredentialsValidator),
   })
 
   const queryClient = useQueryClient()
@@ -57,7 +58,6 @@ function SignInPage() {
 
         toast.success("Signed in successfully")
         if (returnCheckout) {
-          console.log("vamos mardita")
           router.push("/checkout")
           router.refresh()
           return
@@ -78,7 +78,7 @@ function SignInPage() {
     },
   })
 
-  const onSubmit = ({ email, password }: TAuthCredentialsValidator) => {
+  const onSubmit = ({ email, password }: TLoginCredentialsValidator) => {
     signIn({ email, password })
   }
 

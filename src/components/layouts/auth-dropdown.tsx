@@ -54,18 +54,18 @@ export async function AuthDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
+        {/* <Button
           variant="secondary"
           className={cn("size-8 rounded-full", className)}
           {...props}
-        >
-          <Avatar className="size-8">
-            {/* @ts-ignore */}
-            <AvatarImage src={user?.name} alt={user?.name ?? ""} />
-            {/* <AvatarImage src={user.imageUrl} alt={user.username ?? ""} /> */}
-            <AvatarFallback>{initials}</AvatarFallback>
-          </Avatar>
-        </Button>
+        > */}
+        <Avatar className="size-8 cursor-pointer">
+          {/* @ts-ignore */}
+          <AvatarImage src={user?.name} alt={user?.name ?? ""} />
+          {/* <AvatarImage src={user.imageUrl} alt={user.username ?? ""} /> */}
+          <AvatarFallback>{initials}</AvatarFallback>
+        </Avatar>
+        {/* </Button> */}
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
@@ -83,7 +83,7 @@ export async function AuthDropdown({
         <React.Suspense
           fallback={
             <div className="flex flex-col space-y-1.5 p-1">
-              {Array.from({ length: 3 }).map((_, i) => (
+              {Array.from({ length: 1 }).map((_, i) => (
                 <Skeleton key={i} className="h-6 w-full rounded-sm" />
               ))}
             </div>
@@ -109,7 +109,7 @@ async function AuthDropdownGroup() {
   return (
     <DropdownMenuGroup>
       <DropdownMenuItem asChild>
-        <Link href={"/Account"}>
+        <Link href={"/account"}>
           <DashboardIcon className="mr-2 size-4" aria-hidden="true" />
           Account
           <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>

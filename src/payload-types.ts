@@ -15,6 +15,7 @@ export interface Config {
     media: Media;
     invoices: Invoice;
     orders: Order;
+    tiers: Tier;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -43,8 +44,6 @@ export interface Product {
   description?: string | null;
   price: number;
   title: string;
-  priceId: string;
-  stripeId: string;
   categories?: (string | Category)[] | null;
   relatedProducts?: (string | Product)[] | null;
   slug?: string | null;
@@ -54,6 +53,13 @@ export interface Product {
   }[];
   approvedForSale?: ('draft' | 'published') | null;
   featured?: boolean | null;
+  prices?:
+    | {
+        price: number;
+        availableByTier?: (string | null) | Tier;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -110,6 +116,25 @@ export interface Media {
     };
   };
 }
+export interface Tier {
+  id: string;
+  description?: string | null;
+  price: number;
+  title: string;
+  actionLabel: string;
+  priceIdYearly: string;
+  slug?: string | null;
+  approvedForSale?: ('draft' | 'published') | null;
+  popular?: boolean | null;
+  features?:
+    | {
+        feature?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
 export interface Subscription {
   id: string;
   stripeSubscriptionID?: string | null;
@@ -121,6 +146,7 @@ export interface Subscription {
   defaultPaymentMethodId?: string | null;
   email?: string | null;
   ownedBy?: (string | null) | User;
+  tier?: (string | null) | Tier;
   updatedAt: string;
   createdAt: string;
 }
@@ -140,6 +166,8 @@ export interface Invoice {
 export interface Order {
   id: string;
   _isPaid: boolean;
+  deliveryStatus?: ('delivered' | 'pending') | null;
+  status?: ('completed' | 'incomplete' | 'cancelled') | null;
   orderedBy?: (string | null) | User;
   products: (string | Product)[];
   customerOrderDetails:
@@ -151,6 +179,7 @@ export interface Order {
     | number
     | boolean
     | null;
+  total?: number | null;
   updatedAt: string;
   createdAt: string;
 }

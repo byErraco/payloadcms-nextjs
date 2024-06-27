@@ -10,9 +10,9 @@ const CartItem = ({ product }: { product: Product }) => {
 
   const { removeItem } = useCart()
 
-  const label = PRODUCT_CATEGORIES.find(({ value }) =>
-    product.categories?.includes(value)
-  )?.label
+  // const label = PRODUCT_CATEGORIES.find(({ value }) =>
+  //   product.categories?.includes(value)
+  // )?.label
 
   return (
     <div className="space-y-3 py-2">
@@ -41,9 +41,9 @@ const CartItem = ({ product }: { product: Product }) => {
               {product.title}
             </span>
 
-            <span className="line-clamp-1 text-xs capitalize text-muted-foreground">
+            {/* <span className="line-clamp-1 text-xs capitalize text-muted-foreground">
               {label}
-            </span>
+            </span> */}
 
             <div className="mt-4 text-xs text-muted-foreground">
               <button

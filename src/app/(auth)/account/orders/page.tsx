@@ -34,6 +34,34 @@ export default async function Component() {
   } as any)
 
   const [user] = users
+  const { docs: orders } = await payload.find({
+    collection: "orders",
+    where: {
+      orderedBy: {
+        equals: user.id,
+      },
+    },
+  })
+  console.log("orders", orders)
+
+  const orderItems = orders.map((order) => {
+    return {
+      id: order.id,
+      total: order.total,
+      createdAt: order.createdAt,
+      // @ts-ignore
+      items: order?.customerOrderDetails?.products,
+      isPaid: order._isPaid,
+      paymentMethod: "Mastercard ending in 4242",
+      status: "Shipped",
+      shippingAddress: {
+        name: "Jane Smith",
+        address: "456 Oak Rd, Somewhere CA",
+        phone: "555-5678",
+      },
+      orderNumber: "#5678",
+    }
+  })
   //   const { data, isFetching } = useUser()
   //   console.log("data", data)
   //   if (isFetching)
@@ -57,7 +85,7 @@ export default async function Component() {
       </div>
       <Separator />
       <section className="bg-muted/20 py-8 px-4 md:px-6 lg:py-12">
-        <UserOrdersTable />
+        <UserOrdersTable orders={orderItems} />
       </section>
     </div>
   )

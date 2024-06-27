@@ -3,6 +3,7 @@
 import { Shell } from "@/components/shell"
 import { Button } from "@/components/ui/button"
 import { PRODUCT_CATEGORIES } from "@/config"
+import useUser from "@/hooks/use-User"
 import { useCart } from "@/hooks/use-cart"
 import { cn, formatPrice } from "@/lib/utils"
 import { trpc } from "@/trpc/client"
@@ -13,9 +14,12 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 const Page = () => {
+  const { isFetching, data } = useUser()
+
   const { items, removeItem } = useCart()
 
   const router = useRouter()
+  const [cartItems, setCartItems] = useState<any>([])
 
   const { mutate: createCheckoutSession, isLoading } =
     trpc.payment.createSession.useMutation({
@@ -30,12 +34,37 @@ const Page = () => {
   useEffect(() => {
     setIsMounted(true)
   }, [])
+  useEffect(() => {
+    if (items.length > 0) {
+      const cartItemsMap = items.map(({ product: item }: any) => {
+        // console.log("item", item.images[0]?.image?.url)
+        let price
+        if (data?.subscription?.tier?.id)
+          price = item.prices.find(
+            (item: any) =>
+              item.availableByTier?.id === data?.subscription?.tier?.id
+          )?.price
+        return {
+          id: item.id,
+          title: item.title,
+          price: price || 500,
+          // price: price || item.price,
+          images: item.images,
+          // images: item.images[0]?.image?.url,
+          // image: item.images[0]?.url,
+          quantity: 1,
+        }
+      })
+      setCartItems(cartItemsMap)
+    }
+  }, [data, items])
 
-  const cartTotal = items.reduce(
-    (total, { product }) => total + product.price,
-    0
-  )
-
+  // @ts-ignore
+  const cartTotal = cartItems.reduce((total, item) => total + item?.price, 0)
+  // const cartTotal = items.reduce(
+  //   (total, { product }) => total + product.price,
+  //   0
+  // )
   const fee = 1
 
   return (
@@ -101,16 +130,18 @@ const Page = () => {
               })}
             >
               {isMounted &&
-                items.map(({ product }) => {
-                  const label = PRODUCT_CATEGORIES.find((c) =>
-                    // @ts-ignore
-                    product.categories.includes(c.value)
-                  )?.label
+                // items.map(({ product }) => {
+                // @ts-ignore
+                cartItems.map((item) => {
+                  // const label = PRODUCT_CATEGORIES.find((c) =>
+                  //   // @ts-ignore
+                  //   product.categories.includes(c.value)
+                  // )?.label
 
-                  const { image } = product.images[0]
+                  const { image } = item.images[0]
 
                   return (
-                    <li key={product.id} className="flex py-6 sm:py-10">
+                    <li key={item.id} className="flex py-6 sm:py-10">
                       <div className="flex-shrink-0">
                         <div className="relative h-24 w-24">
                           {typeof image !== "string" && image.url ? (
@@ -130,22 +161,22 @@ const Page = () => {
                             <div className="flex justify-between">
                               <h3 className="text-sm">
                                 <Link
-                                  href={`/product/${product.id}`}
+                                  href={`/product/${item.id}`}
                                   className="font-medium "
                                 >
-                                  {product.title}
+                                  {item.title}
                                 </Link>
                               </h3>
                             </div>
 
-                            <div className="mt-1 flex text-sm">
+                            {/* <div className="mt-1 flex text-sm">
                               <p className="text-muted-foreground">
                                 Category: {label}
                               </p>
-                            </div>
+                            </div> */}
 
                             <p className="mt-1 text-sm font-medium ">
-                              {formatPrice(product.price)}
+                              {formatPrice(item.price)}
                             </p>
                           </div>
 
@@ -153,7 +184,7 @@ const Page = () => {
                             <div className="absolute right-0 top-0">
                               <Button
                                 aria-label="remove product"
-                                onClick={() => removeItem(product.id)}
+                                onClick={() => removeItem(item.id)}
                                 variant="ghost"
                               >
                                 <X className="h-5 w-5" aria-hidden="true" />
@@ -218,9 +249,10 @@ const Page = () => {
 
             <div className="mt-6">
               <Button
-                disabled={items.length === 0 || isLoading}
+                disabled={cartItems.length === 0 || isLoading}
                 // @ts-ignore
-                onClick={() => createCheckoutSession({ productIds })}
+                onClick={() => router.push("/checkout")}
+                // onClick={() => createCheckoutSession({ productIds })}
                 className="w-full"
                 size="lg"
               >

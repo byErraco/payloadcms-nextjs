@@ -21,6 +21,7 @@ import { Icons } from "@/components/icons"
 import { PlaceholderImage } from "@/components/placeholder-image"
 import { Product } from "@/payload-types"
 import { useCart } from "@/hooks/use-cart"
+import { Badge } from "./ui/badge"
 
 interface ProductCardProps extends React.HTMLAttributes<HTMLDivElement> {
   product: Product
@@ -37,6 +38,7 @@ export function ProductCard({
   className,
   ...props
 }: ProductCardProps) {
+  // console.log("product", product.prices[0])
   const [isUpdatePending, startUpdateTransition] = React.useTransition()
   const { addItem } = useCart()
 
@@ -77,8 +79,20 @@ export function ProductCard({
       <Link href={`/product/${product.id}`} tabIndex={-1}>
         <CardContent className="space-y-1.5 p-4">
           <CardTitle className="line-clamp-1">{product.title}</CardTitle>
-          <CardDescription className="line-clamp-1">
-            {formatPrice(product.price)}
+          <CardDescription className="flex flex-col gap-1">
+            {/* <CardDescription className="line-clamp-1"> */}
+            {/* {formatPrice(product.price)} */}
+            {product.prices?.length &&
+              product.prices.map((p, index) => (
+                <div key={index}>
+                  {formatPrice(p.price)}{" "}
+                  <Badge variant="outline">
+                    {/* @ts-ignore */}
+                    {p.availableByTier?.description}
+                  </Badge>
+                  {/* <span>{p.availableByTier?.description}</span> */}
+                </div>
+              ))}
           </CardDescription>
         </CardContent>
       </Link>

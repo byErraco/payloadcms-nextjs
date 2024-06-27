@@ -46,6 +46,8 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
 
   const products = order.products as Product[]
 
+  const items = order.customerOrderDetails
+  // @ts-ignore
   const orderTotal = products.reduce((total, product) => {
     return total + product.price
   }, 0)
@@ -94,10 +96,12 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
             <div className="mt-2 ">{order.id}</div>
 
             <ul className="mt-6 divide-y divide-gray-200 border-t border-gray-200 text-sm font-medium text-muted-foreground">
-              {(order.products as Product[]).map((product) => {
-                const label = PRODUCT_CATEGORIES.find(({ value }) =>
-                  product.categories?.includes(value)
-                )?.label
+              {/* {(order.products as Product[]).map((product) => { */}
+              {/* @ts-ignore */}
+              {items?.products.map((product) => {
+                // const label = PRODUCT_CATEGORIES.find(({ value }) =>
+                //   product.categories?.includes(value)
+                // )?.label
 
                 const { image } = product.images[0]
 
@@ -118,7 +122,7 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
                       <div className="space-y-1">
                         <h1 className="text-primary">{product.title}</h1>
 
-                        <p className="my-1">Category: {label}</p>
+                        {/* <p className="my-1">Category: {label}</p> */}
                       </div>
 
                       {/* {order._isPaid ? (
@@ -142,7 +146,8 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
             <div className="space-y-6 border-t border-gray-200 pt-6 text-sm font-medium text-muted-foreground">
               <div className="flex justify-between">
                 <p>Subtotal</p>
-                <p className="">{formatPrice(orderTotal)}</p>
+                {/* @ts-ignore */}
+                <p className="">{formatPrice(order?.total)}</p>
               </div>
 
               <div className="flex justify-between">
@@ -152,7 +157,8 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
 
               <div className="flex items-center justify-between border-t border-gray-200 pt-6 ">
                 <p className="text-base">Total</p>
-                <p className="text-base">{formatPrice(orderTotal + 1)}</p>
+                {/* @ts-ignore */}
+                <p className="text-base">{formatPrice(order?.total + 1)}</p>
               </div>
             </div>
 

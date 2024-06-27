@@ -8,6 +8,13 @@ import { z } from "zod";
 export const appRouter = router({
     auth: authRouter,
     payment: paymentRouter,
+    getTiers: publicProcedure.query(async () => {
+        const payload = await getPayloadClient()
+        const { docs: items } = await payload.find({
+            collection: 'tiers',
+        })
+        return items
+    }),
     getCategories: publicProcedure.query(async () => {
         const payload = await getPayloadClient()
         const { docs: items } = await payload.find({

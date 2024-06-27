@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner"
 import { stripe } from "../../lib/stripe"
 import { AlertDialogSignin } from "../marketing/alert-signin"
+import { Skeleton } from "../ui/skeleton"
 
 type PricingSwitchProps = {
   onSwitch: (value: string) => void
@@ -73,6 +74,7 @@ const PricingSwitch = ({ onSwitch }: PricingSwitchProps) => (
 
 const PricingCard = ({
   onHandleCheckout,
+  id,
   isYearly,
   title,
   monthlyPrice,
@@ -84,7 +86,9 @@ const PricingCard = ({
   exclusive,
   priceIdMonthly,
   priceIdYearly,
-}: PricingCardProps) => (
+  price,
+}: // }: PricingCardProps) => (
+any) => (
   <Card
     className={cn(
       `w-72 flex flex-col justify-between py-1 ${
@@ -98,12 +102,13 @@ const PricingCard = ({
   >
     <div>
       <CardHeader className="pb-8 pt-4">
-        {isYearly && yearlyPrice && monthlyPrice ? (
+        {/* {isYearly && yearlyPrice && monthlyPrice ? ( */}
+        {popular ? (
           <div className="flex justify-between">
             <CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">
               {title}
             </CardTitle>
-            <div
+            {/* <div
               className={cn(
                 "px-2.5 rounded-xl h-fit text-sm py-1 bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white",
                 {
@@ -113,7 +118,7 @@ const PricingCard = ({
               )}
             >
               Save ${monthlyPrice * 12 - yearlyPrice}
-            </div>
+            </div> */}
           </div>
         ) : (
           <CardTitle className="text-zinc-700 dark:text-zinc-300 text-lg">
@@ -122,28 +127,31 @@ const PricingCard = ({
         )}
         <div className="flex gap-0.5">
           <h3 className="text-3xl font-bold">
-            {yearlyPrice && isYearly
+            ${price}
+            {/* {yearlyPrice && isYearly
               ? "$" + yearlyPrice
               : monthlyPrice
               ? "$" + monthlyPrice
-              : "Custom"}
+              : "Custom"} */}
           </h3>
           <span className="flex flex-col justify-end text-sm mb-1">
-            {yearlyPrice && isYearly ? "/year" : monthlyPrice ? "/month" : null}
+            /year
+            {/* {yearlyPrice && isYearly ? "/year" : monthlyPrice ? "/month" : null} */}
           </span>
         </div>
         <CardDescription className="pt-1.5 h-12">{description}</CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">
         {features.map((feature: string) => (
-          <CheckItem key={feature} text={feature} />
+          // @ts-ignore
+          <CheckItem key={feature} text={feature.feature} />
         ))}
       </CardContent>
     </div>
     <CardFooter className="mt-2">
       <Button
         onClick={() =>
-          onHandleCheckout(isYearly ? priceIdYearly : priceIdMonthly, true)
+          onHandleCheckout(isYearly ? priceIdYearly : priceIdMonthly, true, id)
         }
         className="relative inline-flex w-full items-center justify-center rounded-md bg-black text-white dark:bg-white px-6 font-medium  dark:text-black transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50"
       >
@@ -154,7 +162,7 @@ const PricingCard = ({
   </Card>
 )
 
-const CheckItem = ({ text }: { text: string }) => (
+export const CheckItem = ({ text }: { text: string }) => (
   <div className="flex gap-2">
     <CheckCircle2 size={18} className="my-auto text-green-400" />
     <p className="pt-0.5 text-zinc-700 dark:text-zinc-300 text-sm">{text}</p>
@@ -166,7 +174,7 @@ const stripePromise = loadStripe(
 )
 
 export default function PricingTiers() {
-  const [isYearly, setIsYearly] = useState(false)
+  const [isYearly, setIsYearly] = useState(true)
   const [open, setOpen] = useState(false)
   const [selectedTier, setSelectedTier] = useState<any>({
     priceId: "",
@@ -183,6 +191,7 @@ export default function PricingTiers() {
   useEffect(() => {
     if (priceId && subscription) {
       toast.loading("Creating checkout session...")
+      // @ts-ignore
       createCheckoutSession({ priceId, subscription })
     }
   }, [])
@@ -214,9 +223,13 @@ export default function PricingTiers() {
     },
   })
 
-  const onHandleCheckout = async (priceId: string, subscription: boolean) => {
-    setSelectedTier({ priceId, subscription })
-    createCheckoutSession({ priceId, subscription })
+  const onHandleCheckout = async (
+    priceId: string,
+    subscription: boolean,
+    id: any
+  ) => {
+    setSelectedTier({ priceId, subscription, id })
+    createCheckoutSession({ priceId, subscription, id })
   }
   const onHandleRedirectLogin = () => {
     router.push(
@@ -224,70 +237,89 @@ export default function PricingTiers() {
     )
   }
 
-  const plans = [
-    {
-      title: "Basic",
-      monthlyPrice: 10,
-      yearlyPrice: 100,
-      description: "Essential features you need to get started",
-      features: [
-        "Example Feature Number 1",
-        "Example Feature Number 2",
-        "Example Feature Number 3",
-      ],
-      priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      actionLabel: "Get Started",
-    },
-    {
-      title: "Pro",
-      monthlyPrice: 25,
-      yearlyPrice: 250,
-      description: "Perfect for owners of small & medium businessess",
-      priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      features: [
-        "Example Feature Number 1",
-        "Example Feature Number 2",
-        "Example Feature Number 3",
-      ],
-      actionLabel: "Get Started",
-      popular: true,
-    },
-    {
-      title: "Enterprise",
-      price: "Custom",
-      description: "Dedicated support and infrastructure to fit your needs",
-      priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
-      features: [
-        "Example Feature Number 1",
-        "Example Feature Number 2",
-        "Example Feature Number 3",
-        "Super Exclusive Feature",
-      ],
-      actionLabel: "Contact Sales",
-      exclusive: true,
-    },
-  ]
+  const {
+    data: categories,
+    isLoading: featuresLoading,
+    error: categoriesError,
+  } = trpc.getTiers.useQuery(undefined, {
+    refetchOnWindowFocus: false,
+  })
+
+  // const plans = [
+  //   {
+  //     title: "Basic",
+  //     monthlyPrice: 10,
+  //     yearlyPrice: 100,
+  //     description: "Essential features you need to get started",
+  //     features: [
+  //       "Example Feature Number 1",
+  //       "Example Feature Number 2",
+  //       "Example Feature Number 3",
+  //     ],
+  //     priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     actionLabel: "Get Started",
+  //   },
+  //   {
+  //     title: "Pro",
+  //     monthlyPrice: 25,
+  //     yearlyPrice: 250,
+  //     description: "Perfect for owners of small & medium businessess",
+  //     priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     features: [
+  //       "Example Feature Number 1",
+  //       "Example Feature Number 2",
+  //       "Example Feature Number 3",
+  //     ],
+  //     actionLabel: "Get Started",
+  //     popular: true,
+  //   },
+  //   {
+  //     title: "Enterprise",
+  //     price: "Custom",
+  //     description: "Dedicated support and infrastructure to fit your needs",
+  //     priceIdMonthly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     priceIdYearly: "price_1PQhwOINj6G1UXat3cV2Wp38",
+  //     features: [
+  //       "Example Feature Number 1",
+  //       "Example Feature Number 2",
+  //       "Example Feature Number 3",
+  //       "Super Exclusive Feature",
+  //     ],
+  //     actionLabel: "Contact Sales",
+  //     exclusive: true,
+  //   },
+  // ]
   return (
     <div className="py-8">
       <PricingHeader
         title="Pricing Plans"
         subtitle="Choose the plan that's right for you"
       />
-      <PricingSwitch onSwitch={togglePricingPeriod} />
+      {/* <PricingSwitch onSwitch={togglePricingPeriod} /> */}
       <section className="flex flex-col sm:flex-row sm:flex-wrap justify-center gap-8 mt-8">
-        {plans.map((plan) => {
-          return (
-            <PricingCard
-              key={plan.title}
-              {...plan}
-              isYearly={isYearly}
-              onHandleCheckout={onHandleCheckout}
-            />
-          )
-        })}
+        {featuresLoading ? (
+          <>
+            <Skeleton className="w-72 h-72 flex flex-col justify-between py-1 " />
+            <Skeleton className="w-72 h-72 flex flex-col justify-between py-1 " />
+            <Skeleton className="w-72 h-72 flex flex-col justify-between py-1 " />
+          </>
+        ) : (
+          <>
+            {/* @ts-ignore */}
+            {categories.map((plan) => {
+              return (
+                <PricingCard
+                  key={plan.title}
+                  {...plan}
+                  isYearly={isYearly}
+                  onHandleCheckout={onHandleCheckout}
+                />
+              )
+            })}
+          </>
+        )}
       </section>
       <AlertDialogSignin
         setOpen={setOpen}
