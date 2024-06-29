@@ -26,7 +26,8 @@ export function CategoryCard({ category }: any) {
       <Card className="h-full rounded-lg transition-colors hover:border-primary">
         <CardHeader className="flex-1">
           <CardTitle className="capitalize">{category?.title} </CardTitle>
-          <CardDescription className="line-clamp-3 text-balance">
+          <CardDescription className="text-sm text-muted-foreground line-clamp-3 text-balance">
+            {/* <CardDescription className="line-clamp-3 text-balance"> */}
             {category?.description}
           </CardDescription>
         </CardHeader>

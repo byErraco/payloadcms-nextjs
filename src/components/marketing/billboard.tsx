@@ -38,8 +38,8 @@ export default function Billboard() {
         }}
         // @ts-ignore
         plugins={[plugin.current]}
-        onMouseEnter={plugin.current.stop}
-        onMouseLeave={plugin.current.reset}
+        // onMouseEnter={plugin.current.stop}
+        // onMouseLeave={plugin.current.reset}
       >
         <CarouselContent>
           <CarouselItem>

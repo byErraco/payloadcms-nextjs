@@ -17,10 +17,30 @@ const Categories: CollectionConfig = {
             type: 'text',
             required: true,
         },
+        // {
+        //     name: 'media',
+        //     type: 'upload',
+        //     relationTo: 'media',
+        // },
         {
-            name: 'media',
-            type: 'upload',
-            relationTo: 'media',
+            name: 'images',
+            type: 'array',
+            label: 'Product images',
+            minRows: 1,
+            maxRows: 2,
+            required: false,
+            labels: {
+                singular: 'Image',
+                plural: 'Images',
+            },
+            fields: [
+                {
+                    name: 'image',
+                    type: 'upload',
+                    relationTo: 'media',
+                    required: true,
+                },
+            ]
         },
         slugField(),
         {

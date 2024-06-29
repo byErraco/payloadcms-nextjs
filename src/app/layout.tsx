@@ -10,6 +10,9 @@ import { SiteFooter } from "@/components/layouts/site-footer"
 import { SiteHeader } from "@/components/layouts/site-header"
 import { cookies } from "next/headers"
 import { getServerSideUser } from "@/lib/payload-utils"
+import { FloatingNav } from "@/components/floating-nav"
+import { siteConfig } from "@/config/site"
+import { Home, MessageCircle, User } from "lucide-react"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -28,6 +31,25 @@ export default async function RootLayout({
   const nextCookies = cookies()
   const { user } = await getServerSideUser(nextCookies)
 
+  const navItems = [
+    {
+      name: "Home",
+      link: "/",
+      icon: <Home className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
+      name: "About",
+      link: "/about",
+      icon: <User className="h-4 w-4 text-neutral-500 dark:text-white" />,
+    },
+    {
+      name: "Contact",
+      link: "/contact",
+      icon: (
+        <MessageCircle className="h-4 w-4 text-neutral-500 dark:text-white" />
+      ),
+    },
+  ]
   return (
     <html lang="en">
       <body className={inter.className}>
@@ -38,6 +60,7 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <Providers>
+            <FloatingNav navItems={navItems} />
             <SiteHeader user={user} />
             {/* <Navbar title={"AWSHCommerce"} /> */}
             <main className="min-h-[calc(100vh-57px-97px)] flex-1">

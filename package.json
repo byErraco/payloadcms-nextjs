@@ -68,6 +68,7 @@
     "embla-carousel-autoplay": "^8.1.5",
     "embla-carousel-react": "^8.1.5",
     "express": "^4.18.2",
+    "framer-motion": "^11.2.12",
     "input-otp": "^1.2.4",
     "lucide-react": "^0.292.0",
     "next": "14.0.1",

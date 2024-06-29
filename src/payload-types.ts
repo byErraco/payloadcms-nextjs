@@ -66,7 +66,12 @@ export interface Product {
 export interface Category {
   id: string;
   title: string;
-  media?: string | Media | null;
+  images?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
   slug?: string | null;
   description?: string | null;
   featured?: boolean | null;
