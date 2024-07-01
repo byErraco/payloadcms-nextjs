@@ -4,6 +4,7 @@ import { paymentRouter } from "./payment-router";
 import { publicProcedure, router } from "./trpc";
 import { QueryValidator } from "../lib/validators/query-validator";
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 
 export const appRouter = router({
     auth: authRouter,
@@ -123,6 +124,33 @@ export const appRouter = router({
                 items,
                 nextPage: hasNextPage ? nextPage : null,
             }
+        }),
+    getOrderDetails: publicProcedure.input(
+        z.object({ orderNumber: z.string() })
+    )
+        .mutation(async ({ input }) => {
+            const { orderNumber } = input
+
+            const payload = await getPayloadClient()
+
+            // check user exists
+            const { docs: orders } = await payload.find({
+                collection: 'orders',
+                where: {
+                    id: {
+                        equals: orderNumber
+                    }
+                }
+            })
+
+            console.log('orders', orders)
+            if (orders.length === 0) {
+                throw new TRPCError({ code: 'NOT_FOUND' })
+            }
+            const [order] = orders
+            console.log('order', order)
+            return { foundOrder: order }
+
         }),
     getDealers: publicProcedure.input(
         z.object({
