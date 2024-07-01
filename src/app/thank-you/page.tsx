@@ -36,13 +36,13 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
 
   if (!order) return notFound()
 
-  const orderUserId =
-    // @ts-ignore
-    typeof order.orderedBy === "string" ? order.orderedBy : order.orderedBy.id
+  // const orderUserId =
+  //   // @ts-ignore
+  //   typeof order.orderedBy === "string" ? order.orderedBy : order.orderedBy.id
 
-  if (orderUserId !== user?.id) {
-    return redirect(`/sign-in?origin=thank-you?orderId=${order.id}`)
-  }
+  // if (orderUserId !== user?.id) {
+  //   return redirect(`/sign-in?origin=thank-you?orderId=${order.id}`)
+  // }
 
   const products = order.products as Product[]
 
@@ -164,7 +164,7 @@ const ThankYouPage = async ({ searchParams }: PageProps) => {
 
             <PaymentStatus
               isPaid={order._isPaid}
-              orderEmail={(order.orderedBy as User).email}
+              orderEmail={(order.orderedBy as User)?.email}
               orderId={order.id}
             />
 

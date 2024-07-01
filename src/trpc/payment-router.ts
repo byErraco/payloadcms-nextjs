@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { privateProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 // import { stripe } from "../lib/stripe";
 import type { Stripe as TStripe } from "stripe";
 import { Stripe } from "stripe";
@@ -195,6 +195,7 @@ export const paymentRouter = router({
                 const order = await payload.create({
                     collection: 'orders',
                     data: {
+                        customerEmail: user.email,
                         _isPaid: false,
                         //@ts-ignore
                         // products: filteredProducts.map((prod) => prod.id),
@@ -204,6 +205,105 @@ export const paymentRouter = router({
                         total: cartTotal
                     },
                 })
+
+                if (order) {
+                    return {
+                        message: 'Order has been placed successfully',
+                        url: `/purchase/${order.id}`,
+                    }
+                }
+            } catch (error) {
+                console.log('error', error)
+                return {
+                    url: null
+                }
+            }
+        }),
+    createGuestOrder: publicProcedure
+        .input(z.object({ products: z.array(z.string()), orderDetails: orderDetailsSchema }))
+        .mutation(async ({ input }) => {
+            let { products, orderDetails } = input
+            // console.log('orderData', orderData);
+            console.log('input', input);
+
+            // return {
+            //     message: 'success',
+            //     url: null
+            // }
+
+            if (products.length === 0) {
+                throw new TRPCError({ code: 'BAD_REQUEST' })
+            }
+
+            const payload = await getPayloadClient()
+
+
+            const { docs: productDocs } = await payload.find({
+                collection: 'products',
+                where: {
+                    id: {
+                        in: products,
+                    },
+                },
+            })
+
+            const productDocsMap = productDocs.map(p => {
+                // @ts-ignore
+                let price = p.prices.find(price =>
+                    // @ts-ignore
+                    price.availableByTier?.slug === 'basic'
+                )
+                return {
+                    id: p.id,
+                    title: p.title,
+                    // need to set base price for products
+                    price: price?.price || 500,
+                    images: p.images,
+                    quantity: 1,
+                }
+            })
+            console.log('productDocsMap', productDocsMap);
+
+
+            const orderData = {
+                products: productDocsMap,
+                orderDetails,
+            }
+            const cartTotal = productDocsMap.reduce((total, item) => total + item?.price, 0)
+
+
+            // const customers = await stripe.customers.list({ email: user.email });
+            // const customer = customers.data.length ? customers.data[0] : null;
+
+
+            // const filteredProducts = products.filter((prod) =>
+            //     // @ts-ignore
+            //     Boolean(prod.priceId)
+            // )
+            console.log('orderPayload', {
+                customerEmail: orderDetails.email,
+                _isPaid: false,
+                //@ts-ignore
+                // products: filteredProducts.map((prod) => prod.id),
+                products: products,
+                customerOrderDetails: orderData,
+                total: cartTotal
+            })
+
+            try {
+                const order = await payload.create({
+                    collection: 'orders',
+                    data: {
+                        customerEmail: orderDetails.email,
+                        _isPaid: false,
+                        //@ts-ignore
+                        // products: filteredProducts.map((prod) => prod.id),
+                        products: products,
+                        customerOrderDetails: orderData,
+                        total: cartTotal
+                    },
+                })
+                console.log("order", order)
 
                 if (order) {
                     return {
@@ -299,7 +399,8 @@ export const paymentRouter = router({
                 return { url: null }
             }
         }),
-    pollOrderStatus: privateProcedure
+    // pollOrderStatus: privateProcedure
+    pollOrderStatus: publicProcedure
         .input(z.object({ orderId: z.string() }))
         .query(async ({ input }) => {
             const { orderId } = input

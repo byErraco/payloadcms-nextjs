@@ -12,6 +12,7 @@ import { Media } from './collections/Media'
 import { Invoices } from './collections/Invoices'
 import { Orders } from './collections/Orders'
 import Tiers from './collections/Tiers'
+import FflDealers from './collections/FflDealers'
 
 dotenv.config({
   path: path.resolve(__dirname, '../.env'),
@@ -19,7 +20,7 @@ dotenv.config({
 
 export default buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL || '',
-  collections: [Users, Products, Categories, Subscriptions, Media, Invoices, Orders, Tiers],
+  collections: [Users, Products, Categories, Subscriptions, Media, Invoices, Orders, Tiers, FflDealers],
   routes: {
     admin: '/admin'
   },

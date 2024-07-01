@@ -75,9 +75,14 @@ export const Orders: CollectionConfig = {
       name: 'orderedBy',
       type: 'relationship',
       relationTo: 'users',
-      hooks: {
-        beforeChange: [populateOrderedBy],
-      },
+      // hooks: {
+      //   beforeChange: [populateOrderedBy],
+      // },
+      // required: true,
+    },
+    {
+      name: 'customerEmail',
+      type: 'text',
     },
     // {
     //   name: 'user',

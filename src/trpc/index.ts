@@ -124,6 +124,48 @@ export const appRouter = router({
                 nextPage: hasNextPage ? nextPage : null,
             }
         }),
+    getDealers: publicProcedure.input(
+        z.object({
+            limit: z.number().min(1).max(100),
+            cursor: z.string().nullish(),
+            name: z.string().optional(),
+        })
+    )
+        .query(async ({ ctx, input }) => {
+            const { limit, cursor, name } = input
+            const payload = await getPayloadClient()
+
+
+            const {
+                docs: items,
+                hasNextPage,
+                nextPage,
+            } = await payload.find({
+                collection: 'fflDealers',
+                where: {
+                    name: {
+
+                        contains: name,
+                        // contains: name ? name : undefined,
+                    },
+                    // ...parsedQueryOpts,
+                },
+                // sort,
+                depth: 1,
+                limit,
+                // page,
+            })
+
+            let nextCursor: typeof cursor | undefined = undefined;
+            if (items.length > limit) {
+                const nextItem = items.pop(); // return the last item from the array
+                nextCursor = nextItem?.id;
+            }
+            return {
+                items,
+                nextCursor,
+            };
+        })
 })
 
 export type AppRouter = typeof appRouter

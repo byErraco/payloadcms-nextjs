@@ -41,7 +41,10 @@ import { trpc } from "@/trpc/client"
 import { useCart } from "@/hooks/use-cart"
 import { useRouter } from "next/navigation"
 import { title } from "process"
-import { toast } from "@/components/ui/use-toast"
+import { toast } from "sonner"
+// import { toast } from "@/components/ui/use-toast"
+import useUser from "@/hooks/use-User"
+import { FflSearch } from "@/components/ffl-search"
 
 const checkoutFormSchema = z.object({
   name: z
@@ -109,12 +112,9 @@ const checkoutFormSchema = z.object({
       message: "Please select a shipping method.",
     })
     .optional(),
-  fflDealerId: z
-    .string()
-    .min(2, {
-      message: "Please select a shipping method.",
-    })
-    .optional(),
+  fflDealerId: z.string().min(2, {
+    message: "Please select a shipping method.",
+  }),
   fflCertificate: z.any().optional(),
   termsAndConditions: z.boolean(),
 })
@@ -139,15 +139,30 @@ export default function CheckoutFormWrapper() {
 
   const router = useRouter()
   const { items, removeItem, clearCart } = useCart()
+  const { data: user, isFetching } = useUser()
   const productIds = items.map(({ product }) => product.id)
 
   const { mutate: createOrder, isLoading } =
     trpc.payment.createOrder.useMutation({
       // @ts-ignore
       onSuccess: ({ message, url }) => {
-        toast({
-          title: message,
-        })
+        toast(message)
+        // toast({
+        //   title: message,
+        // })
+        clearCart()
+        if (url) router.push(url)
+      },
+    })
+  const { mutate: createGuestOrder, isLoading: isLoadingGuestOrder } =
+    trpc.payment.createGuestOrder.useMutation({
+      // @ts-ignore
+      onSuccess: ({ message, url }) => {
+        toast(message)
+
+        // toast({
+        //   title: message,
+        // })
         clearCart()
         if (url) router.push(url)
       },
@@ -158,7 +173,7 @@ export default function CheckoutFormWrapper() {
     defaultValues,
     mode: "onChange",
   })
-  const { formState } = form
+  const { formState, getValues } = form
 
   // console.log("formState", formState.errors)
   const currentDeliveryMethodValue = form.getValues("deliveryMethod")
@@ -168,6 +183,7 @@ export default function CheckoutFormWrapper() {
     // @ts-ignore
     toast.error("Please fill out all required fields.")
   }
+  console.log("user", user)
 
   const onValid = (data: CheckoutFormValues) => {
     // console.log("onValid")
@@ -189,14 +205,18 @@ export default function CheckoutFormWrapper() {
         toast.error("Please fill out all required fields.")
       }
     }
-    console.log("data", data)
-    console.log("productIds", productIds)
+    // console.log("data", data)
+    // console.log("productIds", productIds)
     // const orderDetails = {
     //   products: productIds,
     //   orderData: data,
     // }
     // console.log("orderData", orderData)
-    createOrder({ products: productIds, orderDetails: data })
+    if (user?.id) {
+      createOrder({ products: productIds, orderDetails: data })
+      return
+    }
+    createGuestOrder({ products: productIds, orderDetails: data })
   }
 
   function onSubmit(data: CheckoutFormValues) {
@@ -447,13 +467,26 @@ export default function CheckoutFormWrapper() {
                 </div>
               </CollapsibleContent>
             </Collapsible>
-            <Collapsible>
-              <CollapsibleTrigger className="w-full flex items-center justify-between rounded-lg bg-muted px-4 py-3 font-medium transition-colors hover:bg-muted/50">
-                <span>FFL Dealer</span>
-                <ChevronDownIcon className="h-5 w-5" />
-              </CollapsibleTrigger>
-              <CollapsibleContent className="rounded-lg border bg-background p-6 shadow-sm">
-                <FormField
+          </>
+        )}
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className="w-full flex items-center justify-between rounded-lg bg-muted px-4 py-3 font-medium transition-colors hover:bg-muted/50">
+            <span>FFL Dealer</span>
+            <ChevronDownIcon className="h-5 w-5" />
+          </CollapsibleTrigger>
+          <CollapsibleContent className="rounded-lg border bg-background p-6 shadow-sm">
+            <FormField
+              control={form.control}
+              name="fflDealerId"
+              render={({ field }) => (
+                <FormItem>
+                  {/* <FormLabel>FFL Dealer</FormLabel> */}
+                  <FflSearch form={form} />
+                </FormItem>
+              )}
+            />
+
+            {/* <FormField
                   control={form.control}
                   name="fflDealerId"
                   render={({ field }) => (
@@ -476,11 +509,9 @@ export default function CheckoutFormWrapper() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
-              </CollapsibleContent>
-            </Collapsible>
-          </>
-        )}
+                /> */}
+          </CollapsibleContent>
+        </Collapsible>
 
         {/* <div className="rounded-lg border bg-background p-6 shadow-sm">
           <div className="mb-4 grid gap-2">

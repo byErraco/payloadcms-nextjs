@@ -16,6 +16,7 @@ export interface Config {
     invoices: Invoice;
     orders: Order;
     tiers: Tier;
+    fflDealers: FflDealer;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
@@ -174,6 +175,7 @@ export interface Order {
   deliveryStatus?: ('delivered' | 'pending') | null;
   status?: ('completed' | 'incomplete' | 'cancelled') | null;
   orderedBy?: (string | null) | User;
+  customerEmail?: string | null;
   products: (string | Product)[];
   customerOrderDetails:
     | {
@@ -185,6 +187,13 @@ export interface Order {
     | boolean
     | null;
   total?: number | null;
+  updatedAt: string;
+  createdAt: string;
+}
+export interface FflDealer {
+  id: string;
+  address?: string | null;
+  name: string;
   updatedAt: string;
   createdAt: string;
 }
