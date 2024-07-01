@@ -50,6 +50,7 @@ export const Orders: CollectionConfig = {
         },
 
       ],
+      defaultValue: 'pending',
       required: false
     },
     {
@@ -69,6 +70,7 @@ export const Orders: CollectionConfig = {
           value: 'cancelled',
         },
       ],
+      defaultValue: 'incomplete',
       required: false
     },
     {
@@ -82,6 +84,7 @@ export const Orders: CollectionConfig = {
     },
     {
       name: 'customerEmail',
+      label: 'Customer Email',
       type: 'text',
     },
     // {

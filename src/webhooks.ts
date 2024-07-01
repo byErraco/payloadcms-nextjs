@@ -222,13 +222,15 @@ async function handlePaymentIntentEvent(
     const data = await resend.emails.send({
       from: 'AWSHCommerce <hello@awsh.net>',
       //   @ts-ignore
-      to: [user.email],
+      // to: [user.email],
+      to: [order.customerEmail],
       subject:
         'Thanks for your order! This is your receipt.',
       html: ReceiptEmailHtml({
         date: new Date(),
         //   @ts-ignore
-        email: user.email,
+        email: order.customerEmail,
+        // email: user.email,
         //   @ts-ignore
         orderId: orderId,
         products: order.products as Product[],
