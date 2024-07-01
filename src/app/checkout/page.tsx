@@ -31,11 +31,11 @@ export default function CheckoutPage() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  useEffect(() => {
-    if (!isFetching && !data) {
-      setOpen(true)
-    }
-  }, [data, isFetching])
+  // useEffect(() => {
+  //   if (!isFetching && !data) {
+  //     setOpen(true)
+  //   }
+  // }, [data, isFetching])
   useEffect(() => {
     if (items.length > 0) {
       const cartItemsMap = items.map(({ product: item }: any) => {
@@ -183,12 +183,12 @@ export default function CheckoutPage() {
           </div>
         </main>
       </div>
-      <AlertDialogSignin
+      {/* <AlertDialogSignin
         setOpen={setOpen}
         open={open}
         callback={onHandleRedirectLogin}
         onCancel={onHandleCancel}
-      />
+      /> */}
     </Shell>
   )
 }
