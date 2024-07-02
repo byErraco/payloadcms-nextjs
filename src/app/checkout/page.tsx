@@ -15,9 +15,9 @@ import CheckoutFormWrapper from "./_components/checkout-form-wrapper"
 import { useEffect, useState } from "react"
 import { useCart } from "@/hooks/use-cart"
 import { formatPrice } from "@/lib/utils"
-import { AlertDialogSignin } from "@/components/marketing/alert-signin"
 import { useRouter } from "next/navigation"
 import useUser from "@/hooks/use-User"
+import { AlertDialogSigninCheckout } from "@/components/marketing/alert-signin-checkout"
 
 export default function CheckoutPage() {
   const { items, removeItem } = useCart()
@@ -31,11 +31,11 @@ export default function CheckoutPage() {
   useEffect(() => {
     setIsMounted(true)
   }, [])
-  // useEffect(() => {
-  //   if (!isFetching && !data) {
-  //     setOpen(true)
-  //   }
-  // }, [data, isFetching])
+  useEffect(() => {
+    if (!isFetching && !data) {
+      setOpen(true)
+    }
+  }, [data, isFetching])
   useEffect(() => {
     if (items.length > 0) {
       const cartItemsMap = items.map(({ product: item }: any) => {
@@ -70,7 +70,8 @@ export default function CheckoutPage() {
 
   const [open, setOpen] = useState(false)
   const onHandleRedirectLogin = () => {
-    router.push(`/sign-in?checkout=true`)
+    // router.push(`/sign-in?checkout=true`)
+    setOpen(false)
   }
   const onHandleCancel = () => {
     router.push("/")
@@ -183,12 +184,12 @@ export default function CheckoutPage() {
           </div>
         </main>
       </div>
-      {/* <AlertDialogSignin
+      <AlertDialogSigninCheckout
         setOpen={setOpen}
         open={open}
         callback={onHandleRedirectLogin}
         onCancel={onHandleCancel}
-      /> */}
+      />
     </Shell>
   )
 }

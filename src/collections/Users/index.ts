@@ -31,7 +31,11 @@ export const Users: CollectionConfig = {
     },
     fields: [
         {
-            name: 'name',
+            name: 'firstName',
+            type: 'text',
+        },
+        {
+            name: 'lastName',
             type: 'text',
         },
 

@@ -24,7 +24,8 @@ export interface Config {
 }
 export interface User {
   id: string;
-  name?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
   roles?: ('admin' | 'customer')[] | null;
   purchases?: (string | Product)[] | null;
   subscription?: (string | null) | Subscription;

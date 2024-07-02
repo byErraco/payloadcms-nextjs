@@ -42,7 +42,7 @@ export async function AuthDropdown({
     )
   }
 
-  const initials = `${user.name?.charAt(0) ?? ""}`
+  const initials = `${user.firstName?.charAt(0) ?? ""}`
 
   //   const initials = `${user.firstName?.charAt(0) ?? ""} ${
   //     user.lastName?.charAt(0) ?? ""

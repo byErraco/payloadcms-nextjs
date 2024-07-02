@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export const authRouter = router({
     createPayloadUser: publicProcedure.input(AuthCredentialsValidator).mutation(async ({ input }) => {
-        const { email, password, name } = input;
+        const { email, password, firstName, lastName } = input;
         const payload = await getPayloadClient()
 
         // check user exists
@@ -32,7 +32,8 @@ export const authRouter = router({
             data: {
                 email,
                 password,
-                name
+                firstName,
+                lastName
             }
         })
         return { success: true, sentToEmail: email }
@@ -83,7 +84,7 @@ export const authRouter = router({
                         }
                     },
                     data: {
-                        name: input.name
+                        firstName: input.name
                     }
                 })
                 return { success: true }
